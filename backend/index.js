@@ -26,15 +26,22 @@ app.get('/test', (req, res) => {
 });
 
 app.post('/register', async (req, res) => {
-    const { name, email, password } = req.body;
+    const { email, phoneNumber, firstName, lastName, password } = req.body;
 
-    try{
-        const userDoc= await User.create({
-            name,
+    try {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email already registered' });
+        }
+
+        const userDoc = await User.create({
             email,
-            password:bcrypt.hashSync(password,bcryptSalt)
-           });
-           res.json(userDoc);
+            phoneNumber,
+            firstName,
+            lastName,
+            password: bcrypt.hashSync(password, bcryptSalt)
+        });
+        res.json(userDoc);
     } catch (err) {
         res.status(500).json({ error: 'Internal server error' });
     }
@@ -58,10 +65,25 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// app.get('/profile',(req,res)=>{
-//     const {token}= req.cookies;
-//     res.json(token);
-// })
+app.get('/profile',(req,res)=>{
+    const { token } = req.cookies;
+    if (token) {
+        jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+            if (err) {
+                return res.status(401).json({ error: 'Token verification failed' });
+            }
+            try {
+                const { name, email, _id } = await User.findById(userData.id);
+                res.json({ name, email, _id });
+            } catch (err) {
+                res.status(500).json({ error: 'Internal server error' });
+            }
+        });
+    } else {
+        res.status(401).json({ error: 'No token provided' });
+    }
+   
+})
 
 app.listen(4000, () => {
     console.log('Server is running on port 4000');
