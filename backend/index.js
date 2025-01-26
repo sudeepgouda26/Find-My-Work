@@ -26,7 +26,6 @@ app.get('/test', (req, res) => {
 });
 
 app.post('/register', async (req, res) => {
-<<<<<<< HEAD
     const { email, phoneNumber, firstName, lastName, password } = req.body;
 
     try {
@@ -43,19 +42,6 @@ app.post('/register', async (req, res) => {
             password: bcrypt.hashSync(password, bcryptSalt)
         });
         res.json(userDoc);
-=======
-    const { firstName,LastName, email, phoneNumber, password } = req.body;
-
-    try{
-        const userDoc= await User.create({
-            firstName,
-            LastName,
-            email,
-            phoneNumber,
-            password:bcrypt.hashSync(password,bcryptSalt)
-           });
-           res.json(userDoc);
->>>>>>> my-work
     } catch (err) {
         res.status(500).json({ error: 'Internal server error' });
     }
@@ -79,7 +65,7 @@ app.post('/login', async (req, res) => {
     }
 });
 
-app.get('/profile',(req,res)=>{
+app.get('/profile', (req, res) => {
     const { token } = req.cookies;
     if (token) {
         jwt.verify(token, jwtSecret, {}, async (err, userData) => {
@@ -87,8 +73,13 @@ app.get('/profile',(req,res)=>{
                 return res.status(401).json({ error: 'Token verification failed' });
             }
             try {
-                const { name, email, _id } = await User.findById(userData.id);
-                res.json({ name, email, _id });
+                const userDoc = await User.findById(userData.id);
+                if (userDoc) {
+                    const { firstName,  email, _id } = userDoc;
+                    res.json({ firstName,  email, _id });
+                } else {
+                    res.status(404).json({ error: 'User not found' });
+                }
             } catch (err) {
                 res.status(500).json({ error: 'Internal server error' });
             }
@@ -96,8 +87,7 @@ app.get('/profile',(req,res)=>{
     } else {
         res.status(401).json({ error: 'No token provided' });
     }
-   
-})
+});
 
 app.listen(4000, () => {
     console.log('Server is running on port 4000');
