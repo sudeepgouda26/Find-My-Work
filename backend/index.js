@@ -26,6 +26,7 @@ app.get('/test', (req, res) => {
 });
 
 app.post('/register', async (req, res) => {
+<<<<<<< HEAD
     const { email, phoneNumber, firstName, lastName, password } = req.body;
 
     try {
@@ -42,6 +43,19 @@ app.post('/register', async (req, res) => {
             password: bcrypt.hashSync(password, bcryptSalt)
         });
         res.json(userDoc);
+=======
+    const { firstName,LastName, email, phoneNumber, password } = req.body;
+
+    try{
+        const userDoc= await User.create({
+            firstName,
+            LastName,
+            email,
+            phoneNumber,
+            password:bcrypt.hashSync(password,bcryptSalt)
+           });
+           res.json(userDoc);
+>>>>>>> my-work
     } catch (err) {
         res.status(500).json({ error: 'Internal server error' });
     }
