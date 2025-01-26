@@ -26,12 +26,14 @@ app.get('/test', (req, res) => {
 });
 
 app.post('/register', async (req, res) => {
-    const { name, email, password } = req.body;
+    const { firstName,LastName, email, phoneNumber, password } = req.body;
 
     try{
         const userDoc= await User.create({
-            name,
+            firstName,
+            LastName,
             email,
+            phoneNumber,
             password:bcrypt.hashSync(password,bcryptSalt)
            });
            res.json(userDoc);

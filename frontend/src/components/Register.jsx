@@ -4,10 +4,12 @@ import axios from 'axios';
 
 const Register = () => {
     
-    const [name, setName] = useState('');
+    const [firstName, setfirstName] = useState('');
+    const [lastName, setlastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [phoneNumber,setphoneNumber]=useState('');
 
     const RegisterSubmit = async (e) => {
         e.preventDefault();
@@ -16,8 +18,10 @@ const Register = () => {
         } else {
             try {
                 const response = await axios.post('http://localhost:4000/register', {
-                    name,
+                    firstName,
+                    lastName,
                     email,
+                    phoneNumber,
                     password,
                 },
                 {
@@ -42,17 +46,31 @@ const Register = () => {
             <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300">
                 <h2 className="text-2xl font-bold text-center text-gray-800">Register</h2>
                 <form onSubmit={RegisterSubmit} className="space-y-4">
+                    <div className='flex gap-5'>
                     <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+                        <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">FirstName</label>
                         <input
                             type="text"
-                            id="name"
-                            name="name"
-                            value={name}
-                            onChange={e => setName(e.target.value)}
+                            id="firstName"
+                            name="firstName"
+                            value={firstName}
+                            onChange={e => setfirstName(e.target.value)}
                             required
                             className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         />
+                    </div>
+                    <div>
+                        <label htmlFor="lasttName" className="block text-sm font-medium text-gray-700">LasttName</label>
+                        <input
+                            type="text"
+                            id="lastName"
+                            name="lastName"
+                            value={lastName}
+                            onChange={e => setlastName(e.target.value)}
+                            required
+                            className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                    </div>
                     </div>
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
@@ -65,6 +83,17 @@ const Register = () => {
                             required
                             className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                         />
+                    </div>
+                    <div>
+                        <label htmlFor="phoneNumber" className='block text-sm font-medium text-gray-700'>PhoneNumber</label>
+                        <input type="number"
+                         name="phoneNumber" 
+                         id="phoneNumber"
+                         value={phoneNumber}
+                            onChange={e => setphoneNumber(e.target.value)}
+                            required
+                            className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                          />
                     </div>
                     <div>
                         <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
