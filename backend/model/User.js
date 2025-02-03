@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const userSchema = new mongoose.Schema({
-
   firstName: {
     type: String,
     required: [true, "First name is required"],
@@ -9,7 +10,6 @@ const userSchema = new mongoose.Schema({
   },
   lastName: {
     type: String,
-    required: [true, "Last name is required"],
     trim: true,
   },
   email: {
@@ -28,6 +28,7 @@ const userSchema = new mongoose.Schema({
   phoneNumber: {
     type: String,
     required: [true, "Phone number is required"],
+    trim: true,
     validate: {
       validator: function (v) {
         return /^\+?[1-9]\d{1,14}$/.test(v); // E.164 format validation
@@ -46,9 +47,22 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+userSchema.pre("save", async function (next) {
+  if (!this.isModified('password')) return next();
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
 
+userSchema.methods.comparePassword = async function (userPassword) {
+  const isMatch = await bcrypt.compare(userPassword, this.password);
+  return isMatch;
+};
 
+userSchema.methods.createJwt = function() {
+  return jwt.sign({ userId: this._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1d' });
+};
 
-const  UserModel= mongoose.model("User", userSchema);
+const UserModel = mongoose.model("User", userSchema);
 
 export default UserModel;

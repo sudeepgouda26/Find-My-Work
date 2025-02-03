@@ -1,94 +1,75 @@
 import express from 'express';
 import cors from 'cors';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+
+
 import  dbConnection  from './database/dbConnection.js';
 import User from './model/User.js'
+import authRoute from "./routes/authRoute.js";
 import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
+import morgan from 'morgan';
+import userRoute from './routes/userRoute.js'
+import jobsRoute from './routes/jobsRoute.js';
+import errorMiddleware from './middelwares/errorMiddelwear.js';
+import bcrypt from 'bcryptjs';
+
+import userAuth from './middelwares/authMiddelware.js';
+dotenv.config();
 
 
 
 const app = express();
 app.use(express.json());
+app.use(morgan('dev'));
 app.use(cookieParser());
-const bcryptSalt =bcrypt.genSaltSync(10) ;
-const jwtSecret = "frffdhhgffddsfghhjjkkjiuytrewsgghhjjhbbg-lmk0olk0okjhhyt";
+const bcryptSalt = bcrypt.genSaltSync(10);
+const jwtSecret = process.env.JWT_SECRET_KEY || "frffdhhgffddsfghhjjkkjiuytrewsgghhjjhbbg-lmk0olk0okjhhyt";
 
 app.use(cors({
     credentials: true,
     origin: 'http://localhost:5173'
 }));
 
-dbConnection();
+
 
 app.get('/test', (req, res) => {
     res.json("test ok");
 });
 
-app.post('/register', async (req, res) => {
-    const { email, phoneNumber, firstName, lastName, password } = req.body;
+app.use('/api/v1/auth',authRoute);
+app.use('/api/v1/user',userAuth,userRoute)
+app.use('/api/v1/jobs',jobsRoute)
+app.use(errorMiddleware);
 
-    try {
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ error: 'Email already registered' });
-        }
 
-        const userDoc = await User.create({
-            email,
-            phoneNumber,
-            firstName,
-            lastName,
-            password: bcrypt.hashSync(password, bcryptSalt)
-        });
-        res.json(userDoc);
-    } catch (err) {
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
 
-app.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-    const userDoc = await User.findOne({ email });
-    if (userDoc) {
-        const passOk = bcrypt.compareSync(password, userDoc.password);
-        if (passOk) {
-            jwt.sign({ email: userDoc.email, id: userDoc._id }, jwtSecret, {}, (err, token) => {
-                if (err) throw err;
-                res.cookie('token', token, { httpOnly: true, secure: false, sameSite: 'lax' }).json(userDoc);
-            });
-        } else {
-            res.status(422).json("pass not ok");
-        }
-    } else {
-        res.json("not found");
-    }
-});
 
-app.get('/profile', (req, res) => {
-    const { token } = req.cookies;
-    if (token) {
-        jwt.verify(token, jwtSecret, {}, async (err, userData) => {
-            if (err) {
-                return res.status(401).json({ error: 'Token verification failed' });
-            }
-            try {
-                const userDoc = await User.findById(userData.id);
-                if (userDoc) {
-                    const { firstName,  email, _id } = userDoc;
-                    res.json({ firstName,  email, _id });
-                } else {
-                    res.status(404).json({ error: 'User not found' });
-                }
-            } catch (err) {
-                res.status(500).json({ error: 'Internal server error' });
-            }
-        });
-    } else {
-        res.status(401).json({ error: 'No token provided' });
-    }
-});
 
+// app.get('/profile', (req, res) => {
+//     const token = req.cookies.token;
+//     if (token) {
+//         jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+//             if (err) {
+//                 return res.status(401).json({ error: 'Token verification failed' });
+//             }
+//             try {
+//                 const userDoc = await User.findById(userData.id);
+//                 if (userDoc) {
+//                     const { firstName, email, _id } = userDoc;
+//                     res.json({ firstName, email, _id });
+//                 } else {
+//                     res.status(404).json({ error: 'User not found' });
+//                 }
+//             } catch (err) {
+//                 res.status(500).json({ error: 'Internal server error' });
+//             }
+//         });
+//     } else {
+//         res.status(401).json({ error: 'No token provided' });
+//     }
+// });
+
+await dbConnection();
 app.listen(4000, () => {
     console.log('Server is running on port 4000');
 });
