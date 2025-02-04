@@ -12,6 +12,8 @@ import userRoute from './routes/userRoute.js'
 import jobsRoute from './routes/jobsRoute.js';
 import errorMiddleware from './middelwares/errorMiddelwear.js';
 import bcrypt from 'bcryptjs';
+import helmet from 'helmet';
+import xssClean from 'xss-clean';
 
 import userAuth from './middelwares/authMiddelware.js';
 dotenv.config();
@@ -19,6 +21,9 @@ dotenv.config();
 
 
 const app = express();
+
+app.use(helmet());
+app.use(xssClean());
 app.use(express.json());
 app.use(morgan('dev'));
 app.use(cookieParser());
@@ -68,6 +73,31 @@ app.use(errorMiddleware);
 //         res.status(401).json({ error: 'No token provided' });
 //     }
 // });
+
+app.get('/profile', (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+        const token = authHeader.split(' ')[1];
+        jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+            if (err) {
+                return res.status(401).json({ error: 'Token verification failed' });
+            }
+            try {
+                const userDoc = await User.findById(userData.id);
+                if (userDoc) {
+                    const { firstName, lastName, email, phoneNumber, _id } = userDoc;
+                    res.json({ firstName, lastName, email, phoneNumber, _id });
+                } else {
+                    res.status(404).json({ error: 'User not found' });
+                }
+            } catch (err) {
+                res.status(500).json({ error: 'Internal server error' });
+            }
+        });
+    } else {
+        res.status(401).json({ error: 'No token provided' });
+    }
+});
 
 await dbConnection();
 app.listen(4000, () => {

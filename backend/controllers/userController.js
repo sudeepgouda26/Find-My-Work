@@ -44,3 +44,18 @@ const updateUserController = async (req, res, next) => {
 }
 
 export default updateUserController;
+
+
+export const profileController = async(req, res, next)=>{
+    try {
+       const user = await UserModel.findById({_id:req.body.user.userId})
+        
+    } catch (error) {
+        console.log(error);
+        res.status(400).send({
+            message:"auth error ",
+            success : false,
+            error:error.message
+        })
+    }
+}

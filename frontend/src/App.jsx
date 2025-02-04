@@ -6,6 +6,7 @@ import Register from './components/Register'
 import axios from 'axios'
 import { UserContextProvider } from './UserContext'
 import Jobs from './components/Jobs'
+import PostJob from './components/PostJob'
 axios.defaults.baseURL ='http://localhost:4000';
 
 function App() {
@@ -16,12 +17,14 @@ function App() {
           
           <Route path='/login' element={<LoginPage />} />
           <Route path='/register' element={<Register />}/>
-          <Route path='/jobs' element={<Jobs/>}/>
+         
         </Route>
+         <Route path='/create-jobs' element={<PostJob/>}/>
       </Routes>
     </UserContextProvider>
    
   )
 }
+
 
 export default App

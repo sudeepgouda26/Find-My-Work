@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import PartTimeJob from "../model/partTimeJob.js";
-
+import moment from "moment/moment.js";
 export const jobController = async(req , res, next)=>{
     try {
         const {jobTitle, description,location, salary,shiftTimings, contact} =req.body;
@@ -121,7 +121,7 @@ export const jobStatsController = async (req, res, next) => {
                 }
             }
         ]);
-        const monthlyStats = await PartTimeJob.aggregate([
+      let    monthlyStats = await PartTimeJob.aggregate([
             {
                 $match: {
                     postedBy: new mongoose.Types.ObjectId(userId),
@@ -140,6 +140,15 @@ export const jobStatsController = async (req, res, next) => {
                 $sort: { "_id.year": -1, "_id.month": -1 } // Sort by year and month
             }
         ]);
+        monthlyStats = monthlyStats.map(item => {
+            const {
+                _id: { month, year },
+                count
+            } = item;
+            const date = moment().month(month - 1).year(year).format("MMM YYYY");
+            return { date, count };
+        })
+        .reverse();
 
         res.status(200).json({
             success: true,

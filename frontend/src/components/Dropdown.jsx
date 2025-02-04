@@ -19,7 +19,7 @@ function Dropdown() {
     <div className='flex flex-col Dropdown'>
         <ul className='flex flex-col gap-4'>
             
-            <Link to={'/apply'}><li>Apply</li></Link>
+            <Link to={'/create-jobs'}><li>upload a job</li></Link>
             <Link to={'/history'}><li>History</li></Link>
             <li onClick={handleLogout} style={{ cursor: 'pointer' }}>Logout</li>
         </ul>
