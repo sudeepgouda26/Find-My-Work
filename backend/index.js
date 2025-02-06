@@ -42,7 +42,7 @@ app.get('/test', (req, res) => {
 });
 
 app.use('/api/v1/auth',authRoute);
-app.use('/api/v1/user',userAuth,userRoute)
+app.use('/api/v1/user',userRoute)
 app.use('/api/v1/jobs',jobsRoute)
 app.use(errorMiddleware);
 
@@ -74,30 +74,6 @@ app.use(errorMiddleware);
 //     }
 // });
 
-app.get('/profile', (req, res) => {
-    const authHeader = req.headers.authorization;
-    if (authHeader) {
-        const token = authHeader.split(' ')[1];
-        jwt.verify(token, jwtSecret, {}, async (err, userData) => {
-            if (err) {
-                return res.status(401).json({ error: 'Token verification failed' });
-            }
-            try {
-                const userDoc = await User.findById(userData.id);
-                if (userDoc) {
-                    const { firstName, lastName, email, phoneNumber, _id } = userDoc;
-                    res.json({ firstName, lastName, email, phoneNumber, _id });
-                } else {
-                    res.status(404).json({ error: 'User not found' });
-                }
-            } catch (err) {
-                res.status(500).json({ error: 'Internal server error' });
-            }
-        });
-    } else {
-        res.status(401).json({ error: 'No token provided' });
-    }
-});
 
 await dbConnection();
 app.listen(4000, () => {

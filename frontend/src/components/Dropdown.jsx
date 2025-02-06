@@ -1,27 +1,38 @@
 import React, { useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { UserContext } from '../UserContext'; 
+import {UserContext} from '../UserContext'; 
 import axios from 'axios';
 
 function Dropdown() {
-    const { setUser } = useContext(UserContext);
+    const { user, setUser } = useContext(UserContext);
     const navigate = useNavigate();
-    const handleLogout = async () => {
-        try {
-            await axios.post('/logout', {}, { withCredentials: true });
-            setUser(null);
-            navigate('/login');
-        } catch (error) {
-            console.error('Error logging out:', error);
-        }
+
+    const handleLogout = () => {
+      axios.post("http://localhost:4000/api/v1/auth/logout", {}, {
+        headers: { "Content-Type": "application/json" }
+      }).then(() => {
+        localStorage.removeItem("token");
+        setUser(null) // Remove JWT token
+        alert("Logged out successfully!");
+        navigate('/login');
+      }).catch((error) => {
+        console.error("Logout failed:", error);
+      });
     };
+
   return (
     <div className='flex flex-col Dropdown'>
         <ul className='flex flex-col gap-4'>
-            
-            <Link to={'/create-jobs'}><li>upload a job</li></Link>
-            <Link to={'/history'}><li>History</li></Link>
-            <li onClick={handleLogout} style={{ cursor: 'pointer' }}>Logout</li>
+            <li><Link to={'/jobs/create'}>upload a job</Link></li>
+            <li><Link to={'/jobs'}>get jobs</Link></li>
+            <li>
+              <button
+                onClick={handleLogout}
+                  
+              >
+                Logout
+              </button>
+            </li>
         </ul>
     </div>
         

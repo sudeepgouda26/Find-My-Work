@@ -1,101 +1,129 @@
 import mongoose from "mongoose";
 import PartTimeJob from "../model/partTimeJob.js";
 import moment from "moment/moment.js";
-export const jobController = async(req , res, next)=>{
+
+
+
+
+
+
+
+export const jobController = async (req, res, next) => {
     try {
-        const {jobTitle, description,location, salary,shiftTimings, contact} =req.body;
-        if (!jobTitle || !description || !location || !salary || !shiftTimings || !contact ) {
+        const { jobTitle, description,  salary, location,details } = req.body;
+
+        if (!jobTitle || !description ||  !salary ||!location ||!details) {
             return res.status(400).send({
                 success: false,
-                message: "All fields are required"
+                message: "All fields are required",
             });
         }
-        req.body.postedBy = req.user.userId;
-        const job = await PartTimeJob.create(req.body);
-        res.status(200).send({
-            success:true,
-            message:"jobs posted succesfully",
-            job
-        })
 
+        const contact = { postedBy: req.user.userId };
+
+ 
+        req.body.postedBy = req.user.userId;  // Assign the userId from the decoded JWT
+        const job = await PartTimeJob.create({
+            jobTitle,
+            description,
+            salary,
+            location,
+            details,
+            contact, // Pass the contact object with postedBy
+        });
+
+        return res.status(200).send({
+            success: true,
+            message: "Job posted successfully",
+            job,
+        });
     } catch (error) {
-        next();
+        next(error);  // Pass errors to the next middleware (e.g., error handling middleware)
     }
 };
 
-export const getjobsController =async(req, res, next)=>{
- 
+
+
+
+
+
+export const getjobsController = async (req, res, next) => {
     try {
-        const jobs = await PartTimeJob.find({postedBy:req.user.userId});
+        const jobs = await PartTimeJob.find({ postedBy: req.user.userId });
         res.status(200).send({
-            success:true,
-            totalJobs:jobs.length,
+            success: true,
+            totalJobs: jobs.length,
             jobs
         });
     } catch (error) {
         next(error);
     }
+};
 
+export const updateJobController = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { jobTitle, description, location, salary, shiftTimings, contact } = req.body;
 
-}
+        if (!jobTitle || !location || !salary || !shiftTimings || !contact || !description) {
+            return res.status(400).send({
+                success: false,
+                message: "All fields are required"
+            });
+        }
 
+        const job = await PartTimeJob.findById(id);
+        if (!job) {
+            return next(new Error("Job not found"));
+        }
 
+        if (req.user.userId !== job.postedBy.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: "You are not authorized to update this job"
+            });
+        }
 
-export const updateJobController = async(req,res,next)=>{
-try {
-    const {id }=req.params;
-    const {jobTitle, description,location, salary,shiftTimings, contact}=req.body;
-    if (!jobTitle || !location || !salary || !shiftTimings || !contact ) {
-        return res.status(400).send({
-            success: false,
-            message: "All fields are required"
+        const updatedJob = await PartTimeJob.findByIdAndUpdate(id, req.body, {
+            new: true,
+            runValidators: true
         });
 
+        res.status(200).send({
+            success: true,
+            updatedJob
+        });
 
+    } catch (error) {
+        next(error);
     }
-    const job = await PartTimeJob.findOne({_id:id});
-    if(!job){
-        next("job is not found");
+};
+
+export const deleteJobController = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const job = await PartTimeJob.findById(id);
+        if (!job) {
+            return next(new Error("Job not found"));
+        }
+
+        if (req.user.userId !== job.postedBy.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: "You are not authorized to delete this job"
+            });
+        }
+
+        await job.deleteOne();
+        res.status(200).send({
+            success: true,
+            message: "Success, job is deleted"
+        });
+
+    } catch (error) {
+        next(error);
     }
-    if(!req.user.userId === job.postedBy.toString()){
-        next(" You are not auotherized to update this ")
-        return;
-       
-    };
-
-    const updateJob = await PartTimeJob.findOneAndUpdate({_id:id}, req.body, {
-        new: true,
-        runValidators: true
-    });
-    res.status(200).send({
-        success:true,
-        updateJob
-    })
-
-} catch (error) {
-    next("unable to update")
-}
-}
-
-export const deleteJobController =async(req,res,next)=>{
-    const {id}=req.params;
-
-    const job = await PartTimeJob.findOne({_id:id});
-    if(!job){
-        next("job not found")
-    }
-    if(req.user.userId !== job.postedBy.toString()){
-            next("you are not auotherized to delete this job");
-            return;
-    }
-    await job.deleteOne();
-    res.status(200).send({
-        success:true,
-        message:"success, job is deleted"
-    })
-}
-
-
+};
 
 export const jobStatsController = async (req, res, next) => {
     try {
@@ -110,22 +138,16 @@ export const jobStatsController = async (req, res, next) => {
 
         const stats = await PartTimeJob.aggregate([
             {
-                $match: {
-                    postedBy: new mongoose.Types.ObjectId(userId)
-                }
+                $match: { postedBy: new mongoose.Types.ObjectId(userId) }
             },
             {
-                $group: {
-                    _id: "$status",
-                    count: { $sum: 1 }
-                }
+                $group: { _id: "$status", count: { $sum: 1 } }
             }
-        ]);
-      let    monthlyStats = await PartTimeJob.aggregate([
+        ]) || [];
+
+        let monthlyStats = await PartTimeJob.aggregate([
             {
-                $match: {
-                    postedBy: new mongoose.Types.ObjectId(userId),
-                }
+                $match: { postedBy: new mongoose.Types.ObjectId(userId) }
             },
             {
                 $group: {
@@ -136,10 +158,9 @@ export const jobStatsController = async (req, res, next) => {
                     count: { $sum: 1 }
                 }
             },
-            {
-                $sort: { "_id.year": -1, "_id.month": -1 } // Sort by year and month
-            }
-        ]);
+            { $sort: { "_id.year": -1, "_id.month": -1 } }
+        ]) || [];
+
         monthlyStats = monthlyStats.map(item => {
             const {
                 _id: { month, year },
@@ -147,8 +168,7 @@ export const jobStatsController = async (req, res, next) => {
             } = item;
             const date = moment().month(month - 1).year(year).format("MMM YYYY");
             return { date, count };
-        })
-        .reverse();
+        }).reverse();
 
         res.status(200).json({
             success: true,
@@ -164,4 +184,3 @@ export const jobStatsController = async (req, res, next) => {
         });
     }
 };
-

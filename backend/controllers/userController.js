@@ -1,3 +1,6 @@
+import User from "../model/User.js";
+import bcrypt from "bcryptjs";
+
 import UserModel from "../model/User.js";
 
 const updateUserController = async (req, res, next) => {
@@ -46,16 +49,29 @@ const updateUserController = async (req, res, next) => {
 export default updateUserController;
 
 
-export const profileController = async(req, res, next)=>{
-    try {
-       const user = await UserModel.findById({_id:req.body.user.userId})
-        
-    } catch (error) {
-        console.log(error);
-        res.status(400).send({
-            message:"auth error ",
-            success : false,
-            error:error.message
-        })
-    }
-}
+export const  getUserController = async(req ,res)=>{
+    
+        try {
+          // Use the userId from the decoded JWT
+          const user = await User.findById(req.user.userId).select('-password'); // Exclude password from the response
+      
+          if (!user) {
+            return res.status(404).json({
+              success: false,
+              message: 'User not found',
+            });
+          }
+      
+          return res.status(200).json({
+            success: true,
+            user,
+          });
+        } catch (error) {
+          console.error(error.message);
+          return res.status(500).json({
+            success: false,
+            message: 'Server error',
+          });
+        }
+      };
+

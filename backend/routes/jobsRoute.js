@@ -4,12 +4,13 @@ import express from 'express';
 
 const router = express.Router();
 
-router.post("/create-jobs",userAuth,jobController)
+router.post("/create", userAuth, jobController); // Ensure this route is correctly defined
 
-router.get('/get-jobs',userAuth,getjobsController)
+router.get('/get-jobs', userAuth, getjobsController);
 
-router.patch('/update-jobs/:id',userAuth,updateJobController)
+router.patch('/update-jobs/:id', userAuth, updateJobController);
 
-router.delete('/delete-jobs/:id',userAuth,deleteJobController)
-router.get('/jobs-stats',userAuth,jobStatsController)
+router.delete('/delete-jobs/:id', userAuth, deleteJobController);
+router.get('/jobs-stats', userAuth, jobStatsController);
+
 export default router;

@@ -1,74 +1,77 @@
 import mongoose from "mongoose";
 
-const  partTimeJobSchema = new mongoose.Schema({
-    
-        jobTitle :{
-            type:String,
-            required :[true,"jobTitle is required"]
-
-        },
-        description: {
-            type: String,
-            required: [true, "Job description is required"],
-            trim: true,
-        },
+const partTimeJobSchema = new mongoose.Schema({
+    jobTitle: {
+        type: String,
+        required: [true, "Job title is required"],
+        trim: true
+    },
+    description: {
+        type: String,
+        required: [true, "Job description is required"],
+        trim: true
+    },
     location: {
-        address: { type: String, required: true }, // Full address
-        city: { type: String },
-        state: { type: String },
-        country: { type: String },
-        zipCode: { type: String },
-        coordinates: {
-            type: { type: String, default: "Point" },
-            coordinates: { type: [Number], default: [0, 0] } // [longitude, latitude]
+        address: { 
+            type: String, 
+            required: [true, "Location address is required"],
+            trim: true
+        },
+        city: {
+            type: String,
+            required: [true, "City is required"],
+            trim: true
+        },
+        state: {
+            type: String,
+            required: [true, "State is required"],
+            trim: true
+        },
+        zipcode: {
+            type: String,
+            required: [true, "Zipcode is required"],
+            trim: true
         }
-
     },
     salary: {
         type: Number,
-        required: [true, "Salary is required"],
+        required: [true, "Salary is required"]
     },
-    status:{
-        type:String,
-        enum:['pending', 'reject','Accept'],
-        default:'pending'
+    status: {
+        type: String,
+        enum: ["pending", "rejected", "accepted"],
+        default: "pending"
     },
-    shiftTimings: [{
-        startTime: { type: Date },
-        endTime: { type: Date }
-    }],
-        contact: {
-            name: { type: String, required: true },
-            email: { type: String, required: true, validate: {
-                validator: function (v) {
-                    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-                },
-                message: (props) => `${props.value} is not a valid email address!`,
-            }},
-            phone: { type: String, required: true, validate: {
-                validator: function (v) {
-                    return /^\+?[1-9]\d{1,14}$/.test(v); // E.164 format validation
-                },
-                message: (props) => `${props.value} is not a valid phone number!`,
-            }}
+    details: {
+        name: {
+            type: String,
+            required: [true, "Contact name is required"],
+            trim: true
         },
-        postedBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-           
+        phoneNumber: {
+            type: String,
+            required: [true, "Contact phone number is required"],
+            trim: true
         },
-
-
-        createdAt: {
-            type: Date,
-            default: Date.now,
-          },
-
+        email: {
+            type: String,
+            required: [true, "Contact email is required"],
+            trim: true
+        }
+    },
+    contact: {
+    postedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
-    
+    }
+});
 
-
-);
-const PartTimeJob = mongoose.model("Job", partTimeJobSchema);
+const PartTimeJob = mongoose.model("PartTimeJob", partTimeJobSchema);
 
 export default PartTimeJob;
