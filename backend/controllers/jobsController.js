@@ -47,107 +47,122 @@ export const jobController = async (req, res, next) => {
 
 
 
+
+
+
+
 export const getjobsController = async (req, res, next) => {
     try {
-        const jobs = await PartTimeJob.find({ postedBy: req.user.userId });
-        res.status(200).send({
+        const jobs = await PartTimeJob.find(); // Fetch all jobs without filtering by userId
+
+        return res.status(200).json({
             success: true,
             totalJobs: jobs.length,
-            jobs
+            jobs,
         });
     } catch (error) {
         next(error);
     }
 };
+
+export const getJobByIdController = async (req, res, next) => {
+    try {
+        const job = await PartTimeJob.findById(req.params.id);
+        if (!job) {
+            return res.status(404).json({ success: false, message: "Job not found" });
+        }
+        res.status(200).json({ success: true, job });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+
 
 export const updateJobController = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { jobTitle, description, location, salary, shiftTimings, contact } = req.body;
+        const { jobTitle, description, location,status, salary, details } = req.body;
 
-        if (!jobTitle || !location || !salary || !shiftTimings || !contact || !description) {
-            return res.status(400).send({
-                success: false,
-                message: "All fields are required"
-            });
-        }
-
-        const job = await PartTimeJob.findById(id);
-        if (!job) {
-            return next(new Error("Job not found"));
-        }
-
-        if (req.user.userId !== job.postedBy.toString()) {
-            return res.status(403).json({
-                success: false,
-                message: "You are not authorized to update this job"
-            });
-        }
-
-        const updatedJob = await PartTimeJob.findByIdAndUpdate(id, req.body, {
-            new: true,
-            runValidators: true
-        });
-
-        res.status(200).send({
-            success: true,
-            updatedJob
-        });
-
-    } catch (error) {
-        next(error);
-    }
-};
-
-export const deleteJobController = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        const job = await PartTimeJob.findById(id);
-        if (!job) {
-            return next(new Error("Job not found"));
-        }
-
-        if (req.user.userId !== job.postedBy.toString()) {
-            return res.status(403).json({
-                success: false,
-                message: "You are not authorized to delete this job"
-            });
-        }
-
-        await job.deleteOne();
-        res.status(200).send({
-            success: true,
-            message: "Success, job is deleted"
-        });
-
-    } catch (error) {
-        next(error);
-    }
-};
-
-export const jobStatsController = async (req, res, next) => {
-    try {
-        const userId = req.user.userId;
-
-        if (!userId) {
+        // Validate required fields
+        if (!jobTitle || !location || !salary || !details || !description || !status) {
             return res.status(400).json({
                 success: false,
-                message: "User ID is required"
+                message: "All fields are required",
             });
         }
 
+        // Find the job
+        const job = await PartTimeJob.findById(id);
+        if (!job) {
+            return res.status(404).json({
+                success: false,
+                message: "Job not found",
+            });
+        }
+
+        // Authorization check (Ensure the logged-in user is the owner of the job)
+        if (req.user.userId !== job.contact.postedBy.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: "You are not authorized to update this job",
+            });
+        }
+
+        // Update the job details
+        const updatedJob = await PartTimeJob.findByIdAndUpdate(
+            id,
+            { jobTitle, description, location, salary,status, details },
+            { new: true, runValidators: true }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Job updated successfully",
+            job: updatedJob,
+        });
+
+    } catch (error) {
+        next(error); // Pass the error to middleware for centralized handling
+    }
+};
+
+
+
+
+
+
+
+
+
+
+export const jobStatsController = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+
+        if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid User ID"
+            });
+        }
+
+        console.log("Fetching stats for user:", userId);
+
         const stats = await PartTimeJob.aggregate([
-            {
-                $match: { postedBy: new mongoose.Types.ObjectId(userId) }
-            },
-            {
-                $group: { _id: "$status", count: { $sum: 1 } }
-            }
-        ]) || [];
+            { $match: { "contact.postedBy": new mongoose.Types.ObjectId(userId) } },
+            { $group: { _id: "$status", count: { $sum: 1 } } }
+        ]);
 
         let monthlyStats = await PartTimeJob.aggregate([
+            { $match: { "contact.postedBy": new mongoose.Types.ObjectId(userId) } },
             {
-                $match: { postedBy: new mongoose.Types.ObjectId(userId) }
+                $addFields: {
+                    createdAt: {
+                        $cond: { if: { $ifNull: ["$createdAt", false] }, then: "$createdAt", else: new Date() }
+                    }
+                }
             },
             {
                 $group: {
@@ -159,16 +174,10 @@ export const jobStatsController = async (req, res, next) => {
                 }
             },
             { $sort: { "_id.year": -1, "_id.month": -1 } }
-        ]) || [];
+        ]);
 
-        monthlyStats = monthlyStats.map(item => {
-            const {
-                _id: { month, year },
-                count
-            } = item;
-            const date = moment().month(month - 1).year(year).format("MMM YYYY");
-            return { date, count };
-        }).reverse();
+        console.log("Final Stats:", stats);
+        console.log("Final Monthly Stats:", JSON.stringify(monthlyStats, null, 2));
 
         res.status(200).json({
             success: true,
@@ -182,5 +191,39 @@ export const jobStatsController = async (req, res, next) => {
             message: "Unable to get stats",
             error: error.message
         });
+    }
+};
+
+
+
+export const deleteJobController = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const job = await PartTimeJob.findById(id);
+        if (!job) {
+            return res.status(404).json({
+                success: false,
+                message: "Job not found",
+            });
+        }
+
+        // Check if the logged-in user is the owner of the job
+        if (req.user.userId !== job.contact.postedBy.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: "You are not authorized to delete this job",
+            });
+        }
+
+        await PartTimeJob.findByIdAndDelete(id);
+
+        return res.status(200).json({
+            success: true,
+            message: "Job deleted successfully",
+        });
+
+    } catch (error) {
+        next(error);
     }
 };

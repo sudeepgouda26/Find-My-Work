@@ -7,6 +7,8 @@ import PrivateRoute from './components/PrivateRoute'
 import { UserContextProvider } from './UserContext'
 import Jobs from './components/Jobs'
 import PostJob from './components/PostJob'
+import UpdateJob from './components/UpdateJob'
+import Stats from './components/Stats'
 
 // axios.defaults.baseURL ='http://localhost:4000';
 
@@ -17,14 +19,7 @@ function App() {
         <Route path='/' element={<Layout />}>
           <Route path='/login' element={<LoginPage />} />
           <Route path='/register' element={<Register />}/>
-          {/* <Route
-            path="/get-jobs"
-            element={
-              <PrivateRoute>
-                <Jobs />
-              </PrivateRoute>
-            }
-          /> */}
+         
           
           <Route
           path="/jobs/create" // ✅ Fixed frontend route
@@ -34,6 +29,25 @@ function App() {
             </PrivateRoute>
           }
         />
+          <Route
+            path="/jobs/get"
+            element={
+              <PrivateRoute>
+                <Jobs />
+              </PrivateRoute>
+            }
+          /> 
+        <Route path="/update-job/:jobId" element={<UpdateJob />} />
+
+        <Route
+          path="/Stats" // ✅ Fixed frontend route
+          element={
+            <PrivateRoute>
+              <Stats/>
+            </PrivateRoute>
+          }
+        />
+     
         </Route>
       </Routes>
     </UserContextProvider>

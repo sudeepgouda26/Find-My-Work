@@ -1,136 +1,157 @@
-import React from 'react'
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useContext, useEffect, useState } from "react";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { Search, Briefcase, MapPin } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Import, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from '../UserContext';
 
 function Jobs() {
-  const jobs = [
-      {
-        title: "Sr. UX Designer",
-        company: "Netflix",
-        type: "Part-time",
-        level: "Expert",
-        remote: true,
-        salary: "$195/hr",
-        location: "San Francisco, USA",
-        description:
-          "Netflix is one of the world's leading streaming entertainment services...",
-        skills: ["Wireframing", "Figma", "Adobe XD", "UX/UI Design"],
-      },
-      {
-        title: "Product Designer",
-        company: "AAA Game Studio",
-        type: "Full-time",
-        level: "Intermediate",
-        remote: false,
-        salary: "$210/hr",
-        location: "Remote",
-        description:
-          "Welcome to LightSpeed LA, the first US-based AAA game development studio...",
-        skills: ["UI Design", "Prototyping", "Figma"],
-      },
-      {
-        title: "Product Designer",
-        company: "AAA Game Studio",
-        type: "Full-time",
-        level: "Intermediate",
-        remote: false,
-        salary: "$210/hr",
-        location: "Remote",
-        description:
-          "Welcome to LightSpeed LA, the first US-based AAA game development studio...",
-        skills: ["UI Design", "Prototyping", "Figma"],
-      },
-      {
-        title: "Product Designer",
-        company: "AAA Game Studio",
-        type: "Full-time",
-        level: "Intermediate",
-        remote: false,
-        salary: "$210/hr",
-        location: "Remote",
-        description:
-          "Welcome to LightSpeed LA, the first US-based AAA game development studio...",
-        skills: ["UI Design", "Prototyping", "Figma"],
-      },
-      {
-        title: "Product Designer",
-        company: "AAA Game Studio",
-        type: "Full-time",
-        level: "Intermediate",
-        remote: false,
-        salary: "$210/hr",
-        location: "Remote",
-        description:
-          "Welcome to LightSpeed LA, the first US-based AAA game development studio...",
-        skills: ["UI Design", "Prototyping", "Figma"],
-      },
-    ];
-    
-    const [selectedJob, setSelectedJob] = useState(null);
-    
-    function JobSearch() {
-        return (
-            <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-6">
-          <div className="max-w-5xl mx-auto">
-            <header className="bg-black text-white p-6 rounded-lg flex justify-between items-center">
-              <h1 className="text-2xl font-bold">Find Your Dream Job Here ✨</h1>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Job title or keyword"
-                  className="p-2 rounded-lg text-black"
-                />
-                <Button variant="outline">
-                  <Search className="w-5 h-5" />
-                </Button>
-              </div>
-            </header>
-    
-            <div className="mt-6 grid grid-cols-3 gap-4 ">
-              {jobs.map((job, index) => (
-                <Card key={index} className="cursor-pointer" onClick={() => setSelectedJob(job)}>
-                  <CardContent className="p-4">
-                    <h2 className="text-lg font-semibold">{job.title}</h2>
-                    <p className="text-sm text-gray-600">{job.company}</p>
-                    <div className="flex items-center gap-2 mt-2 text-sm">
-                      <Briefcase className="w-4 h-4" />
-                      {job.type}
-                      {job.remote && <span className="bg-yellow-200 text-xs p-1 rounded">Remote</span>}
-                    </div>
-                    <p className="mt-2 text-lg font-semibold">{job.salary}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-    
-            {selectedJob && (
-              <div className="mt-6 bg-white p-6 rounded-lg shadow-lg">
-                <h2 className="text-xl font-bold">{selectedJob.title}</h2>
-                <p className="text-sm text-gray-600">{selectedJob.company}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <MapPin className="w-4 h-4" />
-                  {selectedJob.location}
-                </div>
-                <p className="mt-4">{selectedJob.description}</p>
-                <div className="mt-4">
-                  <h3 className="font-semibold">Required Skills:</h3>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {selectedJob.skills.map((skill, idx) => (
-                      <span key={idx} className="bg-gray-200 px-3 py-1 rounded-full text-sm">{skill}</span>
-                    ))}
-                  </div>
-                </div>
-                <Button className="mt-4">Apply Now</Button>
-              </div>
-            )}
+  const [jobs, setJobs] = useState([]);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+  const { user } = useContext(UserContext);
+  const userId = user?._id || ""; // Extracting userId safely
+
+  console.log("Logged-in User ID:", userId);
+
+  const handleDelete = async (job) => {
+    if (!window.confirm("Are you sure you want to delete this job?")) return;
+
+    try {
+      const response = await axios.delete(`http://localhost:4000/api/v1/jobs/delete-jobs/${job._id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
+
+      if (response.data.success) {
+        alert("Job deleted successfully");
+        navigate("/"); // Redirect to home or job list
+      }
+    } catch (error) {
+      console.error("Error deleting job:", error.response?.data || error.message);
+      alert("Failed to delete the job.");
+    }
+  };
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const response = await axios.get("http://localhost:4000/api/v1/jobs/get-jobs", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        setJobs(response.data.jobs);
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+      }
+    };
+    fetchJobs();
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-6">
+      <div className="max-w-5xl mx-auto">
+        <header className="bg-black text-white p-6 rounded-lg flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Find Your Dream Job Here ✨</h1>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Job title or keyword"
+              className="p-2 rounded-lg text-black"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <Button variant="outline">
+              <Search className="w-5 h-5" />
+            </Button>
           </div>
+        </header>
+
+        <div className="mt-6 grid grid-cols-3 gap-4">
+          {jobs
+            .filter((job) => job.jobTitle?.toLowerCase().includes(searchQuery.toLowerCase()))
+            .map((job, index) => (
+              <Card key={index} className="cursor-pointer" onClick={() => setSelectedJob(job)}>
+                <CardContent className="p-4">
+                  <h2 className="text-lg font-semibold">Title: {job.jobTitle}</h2>
+                  <p>{job.description}</p>
+                  <div>
+                    <h3>Location:</h3>
+                    <p>Address: {job.location?.address || "N/A"}</p>
+                    <p>City: {job.location?.city || "N/A"}</p>
+                    <p>State: {job.location?.state || "N/A"}</p>
+                    <p>Zipcode: {job.location?.zipcode || "N/A"}</p>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <p>
+                      <strong>Contact Name:</strong> {job.details?.name || "N/A"}
+                    </p>
+                    <p>
+                      <strong>Phone:</strong>
+                      <a
+                        href={`tel:${job.details?.phoneNumber}`}
+                        className="text-blue-500 underline ml-1"
+                      >
+                        {job.details?.phoneNumber || "N/A"}
+                      </a>
+                    </p>
+                    <p>
+                      <strong>Email:</strong>
+                      <a
+                        href={`https://mail.google.com/mail/?view=cm&fs=1&to=${job.details?.email}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-red-500 underline ml-1"
+                      >
+                        Send via Gmail
+                      </a>
+                    </p>
+                    <p>
+                      <strong>WhatsApp:</strong>
+                      <a
+                        href={`https://wa.me/${job.details?.phoneNumber}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-green-500 underline ml-1"
+                      >
+                        Chat on WhatsApp
+                      </a>
+                    </p>
+                  </div>
+
+                  <p className="mt-2 text-lg font-semibold">Salary: {job.salary}</p>
+
+                  {job.contact?.postedBy?.toString() === userId && (
+                    <div>
+                      <button
+                        onClick={() => navigate(`/update-job/${job._id}`)}
+                        className="bg-blue-500 text-white p-2 rounded-md"
+                      >
+                        Update Job
+                      </button>
+                    </div>
+                  )}
+
+                  {job.contact?.postedBy === userId && (
+                    <button
+                      onClick={() => handleDelete(job)}
+                      className="bg-red-500 text-white p-2 rounded-md"
+                    >
+                      Delete Job
+                    </button>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
         </div>
-    );
+      </div>
+    </div>
+  );
 }
-}
-
-
 
 export default Jobs;

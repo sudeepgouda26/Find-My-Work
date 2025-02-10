@@ -64,7 +64,7 @@ const PostJob = () => {
       );
 
       if (response.status === 201) {
-        navigate("/my-jobs"); // Redirect after successful job post
+        navigate("/jobs/get"); // Redirect after successful job post
       } else {
         setError(response.data.message || "Something went wrong.");
       }

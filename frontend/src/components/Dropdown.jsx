@@ -24,7 +24,8 @@ function Dropdown() {
     <div className='flex flex-col Dropdown'>
         <ul className='flex flex-col gap-4'>
             <li><Link to={'/jobs/create'}>upload a job</Link></li>
-            <li><Link to={'/jobs'}>get jobs</Link></li>
+            <li><Link to={'/jobs/get'}>get jobs</Link></li>
+            <li><Link to={'/Stats'}>stats</Link></li>
             <li>
               <button
                 onClick={handleLogout}
