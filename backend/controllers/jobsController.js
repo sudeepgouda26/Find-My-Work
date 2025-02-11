@@ -227,3 +227,38 @@ export const deleteJobController = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getMyJobsController = async (req, res) => {
+    try {
+        const userId = req.user?.userId;  // Get logged-in user ID
+
+        if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid User ID"
+            });
+        }
+
+        const jobs = await PartTimeJob.find({ "contact.postedBy": userId }); // Fetch all jobs posted by this user
+
+        if (!jobs.length) {
+            return res.status(404).json({
+                success: false,
+                message: "No jobs found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            jobs
+        });
+    } catch (error) {
+        console.error("Error fetching jobs:", error);
+        res.status(500).json({
+            success: false,
+            message: "Unable to get jobs",
+            error: error.message
+        });
+    }
+};
+

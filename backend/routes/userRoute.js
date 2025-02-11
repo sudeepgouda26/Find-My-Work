@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { getUserController } from '../controllers/userController.js';
+import updateUserController, { getUserController } from '../controllers/userController.js';
 import userAuth from '../middelwares/authMiddelware.js';
 import User from '../model/User.js';
 
@@ -15,7 +15,7 @@ router.get('/get-user', userAuth,getUserController )
 
 
 
-// router.put('/update-user',userAuth, updateUserController)
+router.put('/update-user',userAuth, updateUserController)
 
 export default router;
 

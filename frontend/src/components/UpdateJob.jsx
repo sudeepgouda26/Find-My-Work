@@ -5,7 +5,7 @@ import { UserContext } from "../UserContext";
 
 function UpdateJob() {
     const { jobId } = useParams(); // Get jobId from URL
-    const navigate = useNavigate();
+    let navigate = useNavigate();
     const { user } = useContext(UserContext);
     const userId = user?._id || "";
 
@@ -35,6 +35,7 @@ function UpdateJob() {
                 if (response.data.success) {
                     setJobData(response.data.job);
                     setIsAuthorized(response.data.job?.contact?.postedBy === userId);
+                   
                 } else {
                     setError(response.data.message);
                 }
@@ -76,7 +77,7 @@ function UpdateJob() {
 
             if (response.data.success) {
                 alert("Job updated successfully!");
-                navigate("/");
+                navigate('/');
             } else {
                 setError(response.data.message);
             }

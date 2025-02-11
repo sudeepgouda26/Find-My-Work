@@ -8,6 +8,7 @@ function Dropdown() {
     const navigate = useNavigate();
 
     const handleLogout = () => {
+      if (!window.confirm("Are you sure you want to logout?")) return;
       axios.post("http://localhost:4000/api/v1/auth/logout", {}, {
         headers: { "Content-Type": "application/json" }
       }).then(() => {
@@ -26,6 +27,9 @@ function Dropdown() {
             <li><Link to={'/jobs/create'}>upload a job</Link></li>
             <li><Link to={'/jobs/get'}>get jobs</Link></li>
             <li><Link to={'/Stats'}>stats</Link></li>
+        
+          <li><Link to={'/my-jobs'}>my jobs</Link></li>
+          <li><Link to={'/edit-profile'}>edit profile</Link></li>
             <li>
               <button
                 onClick={handleLogout}

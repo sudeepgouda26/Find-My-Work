@@ -126,7 +126,7 @@ function Jobs() {
 
                   <p className="mt-2 text-lg font-semibold">Salary: {job.salary}</p>
 
-                  {job.contact?.postedBy?.toString() === userId && (
+                  {/* {job.contact?.postedBy?.toString() === userId && (
                     <div>
                       <button
                         onClick={() => navigate(`/update-job/${job._id}`)}
@@ -144,7 +144,7 @@ function Jobs() {
                     >
                       Delete Job
                     </button>
-                  )}
+                  )} */}
                 </CardContent>
               </Card>
             ))}

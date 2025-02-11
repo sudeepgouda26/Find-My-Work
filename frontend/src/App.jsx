@@ -9,6 +9,8 @@ import Jobs from './components/Jobs'
 import PostJob from './components/PostJob'
 import UpdateJob from './components/UpdateJob'
 import Stats from './components/Stats'
+import MyJob from './components/MyJob'
+import EditProfile from './components/EditProfile'
 
 // axios.defaults.baseURL ='http://localhost:4000';
 
@@ -44,6 +46,22 @@ function App() {
           element={
             <PrivateRoute>
               <Stats/>
+            </PrivateRoute>
+          }
+        />
+         <Route
+          path="/my-jobs" // ✅ Fixed frontend route
+          element={
+            <PrivateRoute>
+              <MyJob/>
+            </PrivateRoute>
+          }
+        />
+         <Route
+          path="/edit-profile" // ✅ Fixed frontend route
+          element={
+            <PrivateRoute>
+              <EditProfile/>
             </PrivateRoute>
           }
         />
