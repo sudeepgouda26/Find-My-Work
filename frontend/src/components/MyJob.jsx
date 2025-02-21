@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../UserContext";
+import { toast } from "react-toastify";
 
 function MyJobs() {
   const [jobs, setJobs] = useState([]); // Ensure jobs is an array
@@ -50,19 +51,19 @@ function MyJobs() {
       });
 
       if (response.data.success) {
-        alert("Job deleted successfully");
+        toast.success("Job deleted successfully");
         setJobs(jobs.filter((job) => job._id !== jobId)); // Remove deleted job from state
       } else {
-        alert("Failed to delete the job.");
+        toast.error("Failed to delete the job.");
       }
     } catch (error) {
       console.error("Error deleting job:", error.response?.data || error.message);
-      alert("Failed to delete the job.");
+      toast.error("Failed to delete the job.");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-6">
+    <div className=" pt-36 min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-6">
       <div className="max-w-5xl mx-auto">
         <header className="bg-black text-white p-6 rounded-lg text-center">
           <h1 className="text-2xl font-bold">Your Posted Jobs</h1>
@@ -115,5 +116,6 @@ function MyJobs() {
     </div>
   );
 }
+
 
 export default MyJobs;

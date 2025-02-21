@@ -11,64 +11,81 @@ import UpdateJob from './components/UpdateJob'
 import Stats from './components/Stats'
 import MyJob from './components/MyJob'
 import EditProfile from './components/EditProfile'
+import Home from './Home'
+import AboutUs from './components/AboutUs'
+import Contact from './components/Contact'
 
 // axios.defaults.baseURL ='http://localhost:4000';
 
 function App() {
   return (
     <UserContextProvider>
-      <Routes>
-        <Route path='/' element={<Layout />}>
-          <Route path='/login' element={<LoginPage />} />
-          <Route path='/register' element={<Register />}/>
-         
-          
-          <Route
-          path="/jobs/create" // ✅ Fixed frontend route
+    <Routes>
+      {/* Layout wraps all routes, ensuring Header is always present */}
+      <Route path="/" element={<Layout />}>
+        {/* Body only renders on the home route */}
+        <Route index element={<Home />} />
+        <Route path="about" element={<AboutUs/>} />
+        <Route path="contact" element={<Contact />} />
+
+        {/* Authentication Routes */}
+        <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<Register />} />
+
+        {/* Protected Routes (Require Authentication) */}
+        <Route
+          path="jobs/create"
           element={
             <PrivateRoute>
               <PostJob />
             </PrivateRoute>
           }
         />
-          <Route
-            path="/jobs/get"
-            element={
-              <PrivateRoute>
-                <Jobs />
-              </PrivateRoute>
-            }
-          /> 
-        <Route path="/update-job/:jobId" element={<UpdateJob />} />
-
         <Route
-          path="/Stats" // ✅ Fixed frontend route
+          path="jobs/get"
           element={
             <PrivateRoute>
-              <Stats/>
+              <Jobs />
             </PrivateRoute>
           }
         />
-         <Route
-          path="/my-jobs" // ✅ Fixed frontend route
+        <Route
+          path="update-job/:jobId"
           element={
             <PrivateRoute>
-              <MyJob/>
+              <UpdateJob />
             </PrivateRoute>
           }
         />
-         <Route
-          path="/edit-profile" // ✅ Fixed frontend route
+        <Route
+          path="my-jobs"
           element={
             <PrivateRoute>
-              <EditProfile/>
+              <MyJob />
             </PrivateRoute>
           }
         />
-     
-        </Route>
-      </Routes>
-    </UserContextProvider>
+        <Route
+          path="edit-profile"
+          element={
+            <PrivateRoute>
+              <EditProfile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="stats"
+          element={
+            <PrivateRoute>
+              <Stats />
+            </PrivateRoute>
+          }
+        />
+      </Route>
+      {/* <Route index element={<Footer />} /> */}
+    </Routes>
+  </UserContextProvider>
+
    
   )
 }

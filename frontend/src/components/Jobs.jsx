@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Import, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from '../UserContext';
+import { Phone, Mail, MessageCircle } from "lucide-react";
+import { toast } from "react-toastify";
 
 function Jobs() {
   const [jobs, setJobs] = useState([]);
@@ -27,12 +29,12 @@ function Jobs() {
       });
 
       if (response.data.success) {
-        alert("Job deleted successfully");
+        toast.success("Job deleted successfully");
         navigate("/"); // Redirect to home or job list
       }
     } catch (error) {
       console.error("Error deleting job:", error.response?.data || error.message);
-      alert("Failed to delete the job.");
+      toast.error("Failed to delete the job.");
     }
   };
 
@@ -53,15 +55,15 @@ function Jobs() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 p-6">
+    <div className="pt-36 min-h-screen bg-gray-100 p-6">
       <div className="max-w-5xl mx-auto">
-        <header className="bg-black text-white p-6 rounded-lg flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Find Your Dream Job Here ✨</h1>
+        <header className="bg-lime-300 text-slate-950 p-6 rounded-lg flex justify-between items-center shadow-lg">
+          <h1 className="text-2xl font-bold">Find Your Job Here ✨</h1>
           <div className="flex gap-2">
             <input
               type="text"
               placeholder="Job title or keyword"
-              className="p-2 rounded-lg text-black"
+              className="p-2 rounded-lg text-black shadow-md"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -71,80 +73,58 @@ function Jobs() {
           </div>
         </header>
 
-        <div className="mt-6 grid grid-cols-3 gap-4">
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {jobs
             .filter((job) => job.jobTitle?.toLowerCase().includes(searchQuery.toLowerCase()))
             .map((job, index) => (
-              <Card key={index} className="cursor-pointer" onClick={() => setSelectedJob(job)}>
+              <Card key={index} className="cursor-pointer shadow-lg hover:shadow-xl transition-shadow duration-300" onClick={() => setSelectedJob(job)}>
                 <CardContent className="p-4">
-                  <h2 className="text-lg font-semibold">Title: {job.jobTitle}</h2>
+                  <h2 className="text-lg font-semibold">{job.jobTitle}</h2>
                   <p>{job.description}</p>
                   <div>
-                    <h3>Location:</h3>
+                    <h3 className="font-bold mt-2">Location:</h3>
                     <p>Address: {job.location?.address || "N/A"}</p>
                     <p>City: {job.location?.city || "N/A"}</p>
                     <p>State: {job.location?.state || "N/A"}</p>
                     <p>Zipcode: {job.location?.zipcode || "N/A"}</p>
                   </div>
-
-                  <div className="flex flex-col">
+                  <div className="flex flex-col mt-4">
                     <p>
-                      <strong>Contact Name:</strong> {job.details?.name || "N/A"}
+                      <strong>Contact Name: </strong> {job.details?.name || "N/A"}
                     </p>
-                    <p>
-                      <strong>Phone:</strong>
-                      <a
-                        href={`tel:${job.details?.phoneNumber}`}
-                        className="text-blue-500 underline ml-1"
-                      >
-                        {job.details?.phoneNumber || "N/A"}
-                      </a>
-                    </p>
-                    <p>
-                      <strong>Email:</strong>
-                      <a
-                        href={`https://mail.google.com/mail/?view=cm&fs=1&to=${job.details?.email}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-red-500 underline ml-1"
-                      >
-                        Send via Gmail
-                      </a>
-                    </p>
-                    <p>
-                      <strong>WhatsApp:</strong>
-                      <a
-                        href={`https://wa.me/${job.details?.phoneNumber}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-green-500 underline ml-1"
-                      >
-                        Chat on WhatsApp
-                      </a>
-                    </p>
-                  </div>
-
-                  <p className="mt-2 text-lg font-semibold">Salary: {job.salary}</p>
-
-                  {/* {job.contact?.postedBy?.toString() === userId && (
-                    <div>
-                      <button
-                        onClick={() => navigate(`/update-job/${job._id}`)}
-                        className="bg-blue-500 text-white p-2 rounded-md"
-                      >
-                        Update Job
-                      </button>
+                    <div className="flex justify-around mt-2">
+                      <p className="flex items-center">
+                        <Phone className="w-5 h-5 text-blue-500 mr-1" />
+                        <a
+                          href={`tel:${job.details?.phoneNumber}`}
+                          className="text-blue-500 underline"
+                        >
+                          {job.details?.phoneNumber || "N/A"}
+                        </a>
+                      </p>
+                      <p className="flex items-center">
+                        <a
+                          href={`https://mail.google.com/mail/?view=cm&fs=1&to=${job.details?.email}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-red-500 underline"
+                        >
+                          <Mail className="w-5 h-5 text-red-500 mr-1" />
+                        </a>
+                      </p>
+                      <p className="flex items-center">
+                        <a
+                          href={`https://wa.me/${job.details?.phoneNumber}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-green-500 underline"
+                        >
+                          <MessageCircle className="w-5 h-5 text-green-500 mr-1" />
+                        </a>
+                      </p>
                     </div>
-                  )}
-
-                  {job.contact?.postedBy === userId && (
-                    <button
-                      onClick={() => handleDelete(job)}
-                      className="bg-red-500 text-white p-2 rounded-md"
-                    >
-                      Delete Job
-                    </button>
-                  )} */}
+                  </div>
+                  <p className="mt-4 text-lg font-bold">Salary: {job.salary}</p>
                 </CardContent>
               </Card>
             ))}

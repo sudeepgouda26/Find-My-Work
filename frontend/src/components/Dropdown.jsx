@@ -1,10 +1,14 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {UserContext} from '../UserContext'; 
 import axios from 'axios';
+import { toast } from 'react-toastify';
+
 
 function Dropdown() {
     const { user, setUser } = useContext(UserContext);
+   
+   
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -14,34 +18,40 @@ function Dropdown() {
       }).then(() => {
         localStorage.removeItem("token");
         setUser(null) // Remove JWT token
-        alert("Logged out successfully!");
+        toast.success("Logged out successfully!");
         navigate('/login');
       }).catch((error) => {
         console.error("Logout failed:", error);
+        toast.error("Logout failed");
       });
     };
 
   return (
-    <div className='flex flex-col Dropdown'>
-        <ul className='flex flex-col gap-4'>
-            <li><Link to={'/jobs/create'}>upload a job</Link></li>
-            <li><Link to={'/jobs/get'}>get jobs</Link></li>
-            <li><Link to={'/Stats'}>stats</Link></li>
-        
-          <li><Link to={'/my-jobs'}>my jobs</Link></li>
-          <li><Link to={'/edit-profile'}>edit profile</Link></li>
-            <li>
-              <button
-                onClick={handleLogout}
-                  
-              >
+    <div className='flex mt-4 Dropdown bg-gray-600 absolute top-16 right-0 rounded-none border-0 h-auto w-48 text-center shadow-[0px_-4px_2px_#000000]'>
+        <ul className='flex-col text-center gap-5 font-semibold text-base text-slate-200 block w-full '>
+            <li className='hover:bg-gray-700 active:bg-cyan-700 text-center py-3'  >
+              <Link to={'/jobs/create'}  >Upload Job</Link>
+            </li>
+            <li className='hover:bg-gray-700 active:bg-cyan-700  text-center py-3'>
+              <Link to={'/jobs/get'} >Get Jobs</Link>
+            </li>
+            
+            <li className='hover:bg-gray-700 active:bg-cyan-700  text-center py-3'>
+              <Link to={'/Stats'}>Stats</Link>
+            </li>
+
+            <li className='hover:bg-gray-700 active:bg-cyan-700  text-center py-3'><Link to={'/my-jobs'}>My jobs</Link></li>
+            <li className='hover:bg-gray-700 active:bg-cyan-700  text-center py-3'><Link to={'/edit-profile'}>Edit profile</Link></li>
+            <br/>
+            <li className='hover:bg-gray-700 active:bg-cyan-700  text-center py-2'>
+              <button onClick={handleLogout} >
                 Logout
               </button>
             </li>
         </ul>
-    </div>
         
-   
+    </div>
+    
   )
 }
 

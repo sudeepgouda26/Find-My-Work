@@ -1,5 +1,9 @@
+
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Header from "../Header";
+import { toast } from "react-toastify";
 
 const UpdateProfile = () => {
     let navigate = useNavigate();
@@ -22,7 +26,7 @@ const UpdateProfile = () => {
                 const response = await fetch("http://localhost:4000/api/v1/user/get-user", {
                     method: "GET",
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem("token")}`
+                        Authorization:` Bearer ${localStorage.getItem("token")}`
                     }
                 });
                 const data = await response.json();
@@ -53,14 +57,14 @@ const UpdateProfile = () => {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                    Authorization:` Bearer ${localStorage.getItem("token")}`
                 },
                 body: JSON.stringify(user)
             });
 
             const data = await response.json();
             if (data.success) {
-                alert("profile updated Successfully");
+                toast.success("profile updated Successfully");
                 setMessage("Profile updated successfully");
                 localStorage.setItem("token", data.token); 
                 navigate("/");
@@ -75,65 +79,67 @@ const UpdateProfile = () => {
     };
 
     return (
-        <div className="max-w-md mx-auto p-4 bg-white shadow-lg rounded-lg">
-            <h2 className="text-xl font-bold mb-4">Update Profile</h2>
+          <div className="pt-36">
+            <div className=" max-w-md mx-auto p-4 bg-white shadow-lg rounded-lg">
+                <h2 className="text-xl font-bold mb-4">Update Profile</h2>
 
-            {error && <p className="text-red-500">{error}</p>}
-            {message && <p className="text-green-500">{message}</p>}
+                {error && <p className="text-red-500">{error}</p>}
+                {message && <p className="text-green-500">{message}</p>}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                    <label className="block font-medium">First Name</label>
-                    <input
-                        type="text"
-                        name="firstName"
-                        value={user.firstName}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block font-medium">Last Name</label>
-                    <input
-                        type="text"
-                        name="lastName"
-                        value={user.lastName}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block font-medium">Email</label>
-                    <input
-                        type="email"
-                        name="email"
-                        value={user.email}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block font-medium">Phone Number</label>
-                    <input
-                        type="text"
-                        name="phoneNumber"
-                        value={user.phoneNumber}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded"
-                        required
-                    />
-                </div>
-                <button
-                    type="submit"
-                    className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
-                >
-                    Update Profile
-                </button>
-            </form>
-        </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block font-medium">First Name</label>
+                        <input
+                            type="text"
+                            name="firstName"
+                            value={user.firstName}
+                            onChange={handleChange}
+                            className="w-full p-2 border rounded"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block font-medium">Last Name</label>
+                        <input
+                            type="text"
+                            name="lastName"
+                            value={user.lastName}
+                            onChange={handleChange}
+                            className="w-full p-2 border rounded"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block font-medium">Email</label>
+                        <input
+                            type="email"
+                            name="email"
+                            value={user.email}
+                            onChange={handleChange}
+                            className="w-full p-2 border rounded"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block font-medium">Phone Number</label>
+                        <input
+                            type="text"
+                            name="phoneNumber"
+                            value={user.phoneNumber}
+                            onChange={handleChange}
+                            className="w-full p-2 border rounded"
+                            required
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
+                    >
+                        Update Profile
+                    </button>
+                </form>
+            </div>
+            </div>
     );
 };
 
